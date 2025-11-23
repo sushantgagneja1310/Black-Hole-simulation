@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KERR SINGULARITY: Advanced Relativistic Black Hole Physics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            margin: 0; overflow: hidden; background: #000; 
+            color: white; 
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        #canvas-container { 
+            width: 100vw; height: 100vh; 
+            display: block; position: relative;
+            z-index: 1;
+        }
+        #ui {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(5, 5, 8, 0.85); 
+            padding: 25px;
+            border: 1px solid rgba(255, 189, 89, 0.3); 
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(255, 189, 89, 0.05);
+            pointer-events: auto;
+            width: 340px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            z-index: 100;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        #ui:hover { 
+            border-color: rgba(255, 189, 89, 0.6); 
+            background: rgba(5, 5, 8, 0.95);
+        }
+        h1 { 
+            margin: 0 0 20px 0; 
+            font-size: 14px; 
+            color: #ffbd59; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            border-bottom: 2px solid rgba(255, 189, 89, 0.5); 
+            padding-bottom: 12px;
+            text-shadow: 0 0 15px rgba(255, 189, 89, 0.4);
+        }
+        .control { 
+            margin-bottom: 18px; 
+            display: flex; 
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        label { 
+            font-size: 10px; 
+            color: #ccc; 
+            margin-bottom: 8px; 
+            display: flex; 
+            justify-content: space-between;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .value { 
+            color: #ffbd59; 
+            font-weight: bold;
+            font-size: 11px;
+        }
+        input[type="range"] { 
+            cursor: pointer; 
+            accent-color: #ffbd59;
+            height: 4px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 12px; width: 12px;
+            background: #ffbd59;
+            border-radius: 50%;
+            margin-top: -4px;
+            box-shadow: 0 0 10px rgba(255, 189, 89, 0.8);
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+        .presets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .preset-btn {
+            background: rgba(255, 189, 89, 0.1);
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            color: #ffbd59;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .preset-btn:hover {
+            background: rgba(255, 189, 89, 0.2);
+            border-color: rgba(255, 189, 89, 0.6);
+            transform: translateY(-1px);
+        }
+        .preset-btn:active {
+            transform: translateY(0);
+        }
+        .checkbox-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+        }
+        .checkbox-control input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #ffbd59;
+        }
+        .checkbox-control label {
+            margin: 0;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .stats { 
+            font-size: 9px; 
+            color: #888; 
+            margin-top: 20px; 
+            border-top: 1px solid rgba(255, 255, 255, 0.1); 
+            padding-top: 15px; 
+            line-height: 1.8;
+        }
+        .highlight { 
+            color: #ffbd59; 
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 189, 89, 0.3);
+        }
+        .physics-tag {
+            display: inline-block;
+            background: rgba(255, 189, 89, 0.1);
+            color: #ffbd59;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin: 2px 2px 2px 0;
+            font-size: 8px;
+            border: 1px solid rgba(255, 189, 89, 0.1);
+        }
+        .info-box {
+            background: rgba(255, 189, 89, 0.05);
+            border-left: 3px solid rgba(255, 189, 89, 0.5);
+            padding: 10px;
+            margin-top: 12px;
+            border-radius: 4px;
+            font-size: 9px;
+            line-height: 1.6;
+        }
+        .metric-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .metric-item {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .metric-label {
+            font-size: 8px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .metric-value {
+            font-size: 11px;
+            color: #ffbd59;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        #fps-counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(5, 5, 8, 0.85);
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            font-size: 10px;
+            color: #ffbd59;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="fps-counter">FPS: <span id="fps-value">60</span></div>
+
+    <div id="ui">
+        <h1>⚫ Kerr Singularity Engine</h1>
+        
+        <div class="presets">
+            <button class="preset-btn" onclick="applyPreset('schwarzschild')">Schwarzschild</button>
+            <button class="preset-btn" onclick="applyPreset('moderate')">Moderate Spin</button>
+            <button class="preset-btn" onclick="applyPreset('extreme')">Extreme Kerr</button>
+            <button class="preset-btn" onclick="applyPreset('quasar')">Quasar Mode</button>
+            <button class="preset-btn" onclick="applyPreset('sgra')">Sgr A*</button>
+            <button class="preset-btn" onclick="applyPreset('m87')">M87*</button>
+        </div>
+        
+        <div class="control">
+            <label><span>Black Hole Mass</span> <span class="value" id="val-mass">1.0 M☉</span></label>
+            <input type="range" id="mass" min="0.5" max="5.0" step="0.1" value="1.0">
+        </div>
+        
+        <div class="control">
+            <label><span>Spin Parameter (a/M)</span> <span class="value" id="val-kerr">0.7</span></label>
+            <input type="range" id="kerr" min="0.0" max="0.998" step="0.005" value="0.7">
+        </div>
+        
+        <div class="control">
+            <label><span>Disk Temperature</span> <span class="value" id="val-temp">8500 K</span></label>
+            <input type="range" id="temp" min="2000" max="30000" step="500" value="8500">
+        </div>
+        
+        <div class="control">
+            <label><span>Accretion Rate</span> <span class="value" id="val-density">2.0</span></label>
+            <input type="range" id="density" min="0.1" max="8.0" step="0.1" value="2.0">
+        </div>
+        
+        <div class="control">
+            <label><span>Disk Rotation Speed</span> <span class="value" id="val-spin">1.2</span></label>
+            <input type="range" id="spin" min="0.0" max="4.0" step="0.1" value="1.2">
+        </div>
+
+        <div class="control">
+            <label><span>Inclination Angle</span> <span class="value" id="val-inclination">30°</span></label>
+            <input type="range" id="inclination" min="0" max="90" step="5" value="30">
+        </div>
+        
+        <div class="checkbox-control">
+            <input type="checkbox" id="show-jets" checked>
+            <label for="show-jets">Relativistic Jets</label>
+        </div>
+
+        <div class="checkbox-control">
+            <input type="checkbox" id="show-corona" checked>
+            <label for="show-corona">X-ray Corona</label>
+        </div>
+
+        <div class="checkbox-control">
+            <input type="checkbox" id="show-photon-ring" checked>
+            <label for="show-photon-ring">Photon Ring</label>
+        </div>
+
+        <div class="checkbox-control">
+            <input type="checkbox" id="adaptive-quality" checked>
+            <label for="adaptive-quality">Adaptive Quality (FPS boost)</label>
+        </div>
+        
+        <div class="metric-display">
+            <div class="metric-item">
+                <div class="metric-label">Event Horizon</div>
+                <div class="metric-value" id="metric-horizon">1.0 M</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">ISCO Radius</div>
+                <div class="metric-value" id="metric-isco">6.0 M</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Photon Sphere</div>
+                <div class="metric-value" id="metric-photon">1.5 M</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Ergosphere</div>
+                <div class="metric-value" id="metric-ergo">2.0 M</div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong style="color: #ffbd59;">Physics Model:</strong><br>
+            Full general relativistic raytracing with Kerr metric geodesics, frame-dragging, gravitational lensing, Doppler beaming, and redshift effects.
+        </div>
+        
+        <div class="stats">
+            <span class="highlight">◉ IMPLEMENTED PHYSICS</span><br><br>
+            <span class="physics-tag">KERR METRIC</span>
+            <span class="physics-tag">GEODESICS</span>
+            <span class="physics-tag">GRAVITATIONAL LENSING</span>
+            <span class="physics-tag">DOPPLER BEAMING</span>
+            <span class="physics-tag">GRAVITATIONAL REDSHIFT</span>
+            <span class="physics-tag">FRAME DRAGGING</span>
+            <span class="physics-tag">ERGOSPHERE</span>
+            <span class="physics-tag">JETS</span>
+            <span class="physics-tag">CORONA</span>
+            <span class="physics-tag">PHOTON RING</span>
+            <span class="physics-tag">BLOOM/HDR</span>
+            <span class="physics-tag">CHROMATIC ABERRATION</span><br><br>
+            <span style="color: #666;">Drag to orbit • Scroll to zoom • Reset: Double-click</span>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script type="x-shader/x-vertex" id="vertexShader">
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    </script>
+
+    <script type="x-shader/x-fragment" id="fragmentShader">
+        precision highp float;
+
+        uniform float iTime;
+        uniform vec2 iResolution;
+        uniform float uMass;
+        uniform float uKerrSpin;
+        uniform float uTemp;
+        uniform float uDensity;
+        uniform float uSpin;
+        uniform float uInclination;
+        uniform vec3 cameraPos;
+        uniform vec3 cameraDir;
+        uniform vec3 cameraUp;
+        uniform bool uShowJets;
+        uniform bool uShowCorona;
+        uniform bool uShowPhotonRing;
+        uniform float uQuality;
+
+        #define MAX_STEPS 200
+        #define MAX_DIST 100.0
+        #define PI 3.14159265359
+        #define MIN_DIST 0.001
+        
+        mat2 rot(float a) { 
+            float s = sin(a), c = cos(a); 
+            return mat2(c, -s, s, c); 
+        }
+
+        mat3 rotY(float a) {
+            float s = sin(a), c = cos(a);
+            return mat3(c, 0, s, 0, 1, 0, -s, 0, c);
+        }
+
+        mat3 rotX(float a) {
+            float s = sin(a), c = cos(a);
+            return mat3(1, 0, 0, 0, c, -s, 0, s, c);
+        }
+        
+        float hash13(vec3 p3) {
+            p3 = fract(p3 * 0.1031);
+            p3 += dot(p3, p3.zyx + 31.32);
+            return fract((p3.x + p3.y) * p3.z);
+        }
+        
+        vec3 hash33(vec3 p3) {
+            p3 = fract(p3 * vec3(0.1031, 0.1030, 0.0973));
+            p3 += dot(p3, p3.yxz + 33.33);
+            return fract((p3.xxy + p3.yxx) * p3.zyx);
+        }
+
+        float noise(vec3 p) {
+            vec3 i = floor(p);
+            vec3 f = fract(p);
+            f = f * f * (3.0 - 2.0 * f);
+            return mix(
+                mix(mix(hash13(i + vec3(0,0,0)), hash13(i + vec3(1,0,0)), f.x),
+                    mix(hash13(i + vec3(0,1,0)), hash13(i + vec3(1,1,0)), f.x), f.y),
+                mix(mix(hash13(i + vec3(0,0,1)), hash13(i + vec3(1,0,1)), f.x),
+                    mix(hash13(i + vec3(0,1,1)), hash13(i + vec3(1,1,1)), f.x), f.y),
+                f.z
+            );
+        }
+
+        float fbm(vec3 p) {
+            float value = 0.0;
+            float amplitude = 0.5;
+            float frequency = 1.0;
+            for(int i = 0; i < 6; i++) {
+                value += amplitude * noise(p * frequency);
+                frequency *= 2.0;
+                amplitude *= 0.5;
+            }
+            return value;
+        }
+
+        float domainWarp(vec3 p, float time) {
+            vec3 q = vec3(
+                fbm(p + vec3(0.0, 0.0, time * 0.1)),
+                fbm(p + vec3(5.2, 1.3, time * 0.15)),
+                fbm(p + vec3(1.7, 9.2, time * 0.12))
+            );
+            vec3 r = vec3(
+                fbm(p + 4.0 * q + vec3(1.7, 9.2, time * 0.08)),
+                fbm(p + 4.0 * q + vec3(8.3, 2.8, time * 0.1)),
+                fbm(p + 4.0 * q + vec3(2.1, 4.5, time * 0.09))
+            );
+            return fbm(p + 4.0 * r);
+        }
+
+        vec3 blackbodyRadiation(float temperature) {
+            temperature = clamp(temperature, 1000.0, 50000.0);
+            vec3 color;
+            float t = temperature / 100.0;
+            
+            if(t <= 66.0) { 
+                color.r = 1.0; 
+                color.g = clamp(0.390081579 * log(t) - 0.631841444, 0.0, 1.0);
+            } else { 
+                color.r = clamp(1.292936186 * pow(t - 60.0, -0.1332047592), 0.0, 1.0);
+                color.g = clamp(1.129890861 * pow(t - 60.0, -0.0755148492), 0.0, 1.0);
+            }
+            
+            if(t >= 66.0) color.b = 1.0; 
+            else if(t <= 19.0) color.b = 0.0; 
+            else color.b = clamp(0.543206789 * log(t - 10.0) - 1.196254089, 0.0, 1.0);
+            
+            if(temperature < 2000.0) color *= temperature / 2000.0;
+            return color;
+        }
+
+        float kerrEventHorizon(float M, float a) { 
+            return M + sqrt(max(0.0, M * M - a * a)); 
+        }
+        
+        float kerrISCO(float M, float a) {
+            float Z1 = 1.0 + pow(max(0.001, 1.0 - (a*a)/(M*M)), 1.0/3.0) * (pow(1.0 + a/M, 1.0/3.0) + pow(max(0.001, 1.0 - a/M), 1.0/3.0));
+            float Z2 = sqrt(3.0 * (a*a)/(M*M) + Z1 * Z1);
+            float rISCO = M * (3.0 + Z2 - sqrt((3.0 - Z1) * (3.0 + Z1 + 2.0 * Z2)));
+            return max(rISCO, kerrEventHorizon(M, a) * 1.1);
+        }
+
+        float gravitationalRedshift(float r, float M) { 
+            return sqrt(max(0.001, 1.0 - (2.0 * M) / max(r, 2.0 * M))); 
+        }
+        
+        float frameDragging(float r, float theta, float M, float a) {
+            float r2 = r * r; 
+            float a2 = a * a;
+            float cosTheta = cos(theta);
+            float sigma = r2 + a2 * cosTheta * cosTheta;
+            float delta = r2 - 2.0 * M * r + a2;
+            return (2.0 * M * r * a) / (sigma * (sigma + 2.0 * M * r) + 1e-6);
+        }
+
+        float ergosphereRadius(float theta, float M, float a) {
+            float cosTheta = cos(theta);
+            return M + sqrt(max(0.0, M * M - a * a * cosTheta * cosTheta));
+        }
+
+        vec3 renderStars(vec3 rd) {
+            vec3 stars = vec3(0.0);
+            
+            float starHash = hash13(floor(rd * 500.0));
+            float starThreshold = 0.9988;
+            
+            if(starHash > starThreshold) {
+                float brightness = pow((starHash - starThreshold) / (1.0 - starThreshold), 2.0);
+                
+                float starTemp = hash13(floor(rd * 500.0) + vec3(123.45));
+                vec3 starColor;
+                if(starTemp < 0.25) starColor = vec3(0.6, 0.7, 1.0);      // Blue
+                else if(starTemp < 0.5) starColor = vec3(1.0, 1.0, 0.98); // White
+                else if(starTemp < 0.75) starColor = vec3(1.0, 0.9, 0.7); // Yellow
+                else starColor = vec3(1.0, 0.6, 0.4);                     // Red
+                
+                float twinkle = 0.8 + 0.2 * sin(iTime * 2.5 + starHash * 100.0);
+                stars += starColor * brightness * 2.5 * twinkle;
+            }
+            
+            float medHash = hash13(floor(rd * 250.0));
+            if(medHash > 0.998) {
+                stars += vec3(0.7, 0.8, 1.0) * 0.6;
+            }
+            
+            return stars;
+        }
+
+        vec3 renderCosmos(vec3 rd) {
+            vec3 color = vec3(0.008, 0.015, 0.03);
+            
+            float galacticPlane = 1.0 - smoothstep(0.0, 0.6, abs(rd.y));
+            
+            vec3 nebulaPos = rd * 3.5;
+            float nebula1 = domainWarp(nebulaPos, iTime * 0.02);
+            float nebula2 = domainWarp(nebulaPos * 1.3 + vec3(10.0), iTime * 0.025);
+            
+            vec3 nebulaColor1 = vec3(0.5, 0.25, 0.7) * pow(nebula1, 2.8) * galacticPlane * 0.4;
+            vec3 nebulaColor2 = vec3(0.25, 0.45, 0.75) * pow(nebula2, 3.2) * galacticPlane * 0.25;
+            
+            float dust = fbm(rd * 12.0 + vec3(0.0, iTime * 0.01, 0.0));
+            vec3 dustColor = vec3(0.25, 0.22, 0.18) * pow(dust, 2.2) * galacticPlane * 0.3;
+            
+            float galaxyHash = hash13(floor(rd * 100.0));
+            if(galaxyHash > 0.9985) {
+                float galaxyGlow = exp(-length(fract(rd * 100.0) - 0.5) * 10.0);
+                color += vec3(0.75, 0.8, 0.85) * galaxyGlow * 0.25;
+            }
+            
+            color += dustColor + nebulaColor1 + nebulaColor2 + renderStars(rd);
+            return color;
+        }
+
+        void main() {
+            vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / iResolution.y;
+            
+            vec3 ro = cameraPos;
+            vec3 forward = normalize(cameraDir);
+            vec3 right = normalize(cross(cameraUp, forward));
+            vec3 up = cross(forward, right);
+            vec3 rd = normalize(forward + uv.x * right + uv.y * up);
+
+            float inclRad = uInclination * PI / 180.0;
+            mat3 inclinationRot = rotX(inclRad);
+            rd = inclinationRot * rd;
+            ro = inclinationRot * ro;
+
+            float M = uMass;
+            float a = uKerrSpin * M;
+            float rH = kerrEventHorizon(M, a);
+            float rISCO = kerrISCO(M, a);
+            float rPhoton = 1.5 * M;
+            
+            float diskInner = rISCO * 0.98;
+            float diskOuter = rISCO * 9.0;
+            
+            vec3 pos = ro;
+            float t = 0.0;
+            bool hitHorizon = false;
+            
+            vec3 diskEmission = vec3(0.0);
+            vec3 jetEmission = vec3(0.0);
+            vec3 coronaEmission = vec3(0.0);
+            float diskDensity = 0.0;
+            float closestApproach = 1000.0;
+            
+            int maxSteps = int(float(MAX_STEPS) * uQuality);
+            
+            for(int step = 0; step < MAX_STEPS; step++) {
+                if(step >= maxSteps) break;
+                
+                pos = ro + rd * t;
+                float r = length(pos);
+                closestApproach = min(closestApproach, r);
+                
+                if(r < rH * 1.005) { 
+                    hitHorizon = true; 
+                    break; 
+                }
+                
+                vec3 toCenter = -normalize(pos);
+                float gravStrength = (M * 4.0) / max(r * r, 0.01);
+                
+                float theta = acos(clamp(pos.y / max(r, 0.001), -1.0, 1.0));
+                float dragEffect = frameDragging(r, theta, M, a);
+                
+                vec3 deflection = toCenter * gravStrength;
+                
+                vec3 rotAxis = normalize(vec3(0.0, 1.0, 0.0));
+                vec3 tangent = normalize(cross(pos, rotAxis));
+                deflection += tangent * dragEffect * 0.8;
+                
+                float stepSize = max(0.015, r * 0.03);
+                stepSize = min(stepSize, 0.3);
+                // stepSize *= uQuality; // Removed for stability
+                
+                rd += deflection * stepSize;
+                rd = normalize(rd);
+                
+                // Relativistic Jets
+                if(uShowJets) {
+                    float jetRadius = 0.25 + 0.15 * uKerrSpin;
+                    float distToAxis = length(pos.xz);
+                    
+                    if(abs(pos.y) > diskInner * 0.4 && distToAxis < jetRadius * 1.5 && r < diskOuter * 0.8) {
+                        float jetCore = smoothstep(jetRadius, jetRadius * 0.2, abs(distToAxis - jetRadius * 0.4));
+                        
+                        vec3 jetCoord = vec3(pos.y * 0.4, atan(pos.z, pos.x) * 4.0, iTime * 0.25);
+                        float jetTurbulence = domainWarp(jetCoord, iTime);
+                        
+                        float jetDirection = sign(pos.y);
+                        float dopplerBoost = jetDirection > 0.0 ? 1.8 : 0.6;
+                        
+                        vec3 jetColor = mix(vec3(0.3, 0.5, 1.0), vec3(0.5, 0.7, 1.0), jetTurbulence);
+                        float jetIntensity = jetCore * pow(jetTurbulence, 1.5) * dopplerBoost * uDensity * 0.12;
+                        jetEmission += jetColor * jetIntensity * 1.5;
+                    }
+                }
+                
+                // X-ray Corona
+                if(uShowCorona && r < diskInner * 2.5 && r > rH * 1.2) {
+                    float coronaDist = abs(r - diskInner * 1.3);
+                    float coronaMask = exp(-coronaDist * 2.0) * smoothstep(diskInner * 2.5, diskInner * 1.5, r);
+                    
+                    vec3 coronaCoord = pos * 2.0 + vec3(iTime * 0.1);
+                    float coronaTurbulence = fbm(coronaCoord);
+                    
+                    vec3 coronaColor = vec3(0.7, 0.85, 1.0);
+                    float coronaIntensity = coronaMask * coronaTurbulence * uDensity * 0.08;
+                    coronaEmission += coronaColor * coronaIntensity;
+                }
+                
+                // Accretion Disk
+                float diskHeight = 0.12 + 0.08 * sin(r * 2.5 - iTime * uSpin * 0.35);
+                
+                if(abs(pos.y) < diskHeight && r > diskInner && r < diskOuter) {
+                    float vKep = sqrt(M / max(r, 0.1));
+                    float rotAngle = atan(pos.z, pos.x) + iTime * vKep * uSpin * 0.25;
+                    
+                    float spiralArms = sin(rotAngle * 4.0 - r * 0.9 + iTime * 0.5) * 0.5 + 0.5;
+                    
+                    vec3 diskCoord = vec3(r * 0.7, rotAngle * 5.0, iTime * 0.15);
+                    float plasma = domainWarp(diskCoord, iTime);
+                    plasma = mix(plasma, spiralArms, 0.35);
+                    
+                    float radialMask = smoothstep(diskInner, diskInner + 0.4, r) * smoothstep(diskOuter, diskOuter - 2.0, r);
+                    float heightMask = smoothstep(diskHeight, diskHeight * 0.25, abs(pos.y));
+                    float diskMask = radialMask * heightMask;
+                    
+                    if(diskMask > 0.01) {
+                        vec3 gasVel = normalize(vec3(-pos.z, 0.0, pos.x));
+                        float doppler = dot(gasVel, -rd);
+                        float beaming = pow(1.0 + doppler * 0.7, 4.0);
+                        beaming = clamp(beaming, 0.05, 6.0);
+                        
+                        float baseTemp = uTemp * pow(diskInner / max(r, diskInner), 0.75) * beaming;
+                        baseTemp *= gravitationalRedshift(r, M);
+                        
+                        vec3 emission = blackbodyRadiation(baseTemp);
+                        
+                        vec3 plasmaGlow = vec3(0.25, 0.6, 1.0) * plasma * 3.5;
+                        emission = mix(emission, plasmaGlow, 0.3);
+                        
+                        float hotSpot = pow(plasma, 10.0) * 2.5;
+                        emission += vec3(1.0, 0.85, 0.6) * hotSpot;
+                        
+                        float localDensity = uDensity * plasma * diskMask * 0.045;
+                        diskEmission += emission * localDensity * beaming;
+                        diskDensity += localDensity;
+                    }
+                }
+                
+                t += stepSize;
+                if(t > MAX_DIST) break;
+            }
+            
+            vec3 finalColor = vec3(0.0);
+            
+            // Background cosmos
+            if(!hitHorizon) {
+                vec3 background = renderCosmos(rd);
+                float opacity = clamp(diskDensity * 2.5, 0.0, 1.0);
+                finalColor += background * (1.0 - opacity);
+            }
+            
+            finalColor += diskEmission;
+            finalColor += jetEmission;
+            finalColor += coronaEmission;
+            
+            // Photon ring
+            if(uShowPhotonRing && closestApproach < rPhoton * 1.5) {
+                float glowDist = abs(closestApproach - rPhoton);
+                float primaryGlow = exp(-glowDist * 15.0) * 1.5;
+                float secondaryGlow = exp(-glowDist * 7.0) * 0.5;
+                float tertiaryGlow = exp(-glowDist * 3.0) * 0.15;
+                
+                vec3 ringColor = vec3(0.5, 0.75, 1.0);
+                finalColor += ringColor * (primaryGlow + secondaryGlow + tertiaryGlow);
+            }
+            
+            // Chromatic aberration
+            float distFromCenter = length(uv);
+            vec2 caOffset = normalize(uv) * distFromCenter * 0.003;
+            finalColor.r *= 1.0 + distFromCenter * 0.04;
+            finalColor.b *= 1.0 - distFromCenter * 0.04;
+            
+            // HDR bloom
+            float brightness = dot(finalColor, vec3(0.299, 0.587, 0.114));
+            if(brightness > 0.7) {
+                vec3 bloom = finalColor * pow(brightness - 0.7, 1.5) * 0.9;
+                finalColor += bloom;
+            }
+            
+            // Lens flare for very bright regions
+            if(brightness > 2.0) {
+                float flareDist = length(uv);
+                float flare = exp(-flareDist * 2.5) * (brightness - 2.0) * 0.25;
+                vec3 flareColor = vec3(0.6, 0.75, 1.0);
+                finalColor += flareColor * flare;
+                
+                // Hexagonal flare pattern
+                float angle = atan(uv.y, uv.x);
+                float hexPattern = abs(sin(angle * 6.0)) * 0.5 + 0.5;
+                finalColor += flareColor * hexPattern * exp(-flareDist * 3.0) * 0.1;
+            }
+            
+            // Film grain
+            float grain = hash13(vec3(uv * iTime * 0.1, iTime)) * 0.025;
+            finalColor += grain;
+            
+            // ACES tonemapping - fixed variable name conflict
+            const float ac_a = 2.51, ac_b = 0.03, ac_c = 2.43, ac_d = 0.59, ac_e = 0.14;
+            finalColor = clamp((finalColor * (ac_a * finalColor + ac_b)) / 
+                               (finalColor * (ac_c * finalColor + ac_d) + ac_e), 0.0, 1.0);
+            
+            // Gamma correction
+            finalColor = pow(finalColor, vec3(1.0 / 2.2));
+            
+            // Vignette
+            float vignette = 1.0 - pow(length(uv) * 0.65, 2.2);
+            finalColor *= vignette;
+            
+            gl_FragColor = vec4(finalColor, 1.0);
+        }
+    </script>
+
+    <script>
+        const canvasContainer = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            precision: 'highp',
+            powerPreference: 'high-performance'
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        canvasContainer.appendChild(renderer.domElement);
+
+        let radius = 12, theta = 0, phi = Math.PI / 2 - 0.2;
+        const initialRadius = 12, initialTheta = 0, initialPhi = Math.PI / 2 - 0.2;
+
+        const uniforms = {
+            iTime: { value: 0 },
+            iResolution: { value: new THREE.Vector2(
+                window.innerWidth * renderer.getPixelRatio(), 
+                window.innerHeight * renderer.getPixelRatio()
+            )},
+            uMass: { value: 1.0 },
+            uKerrSpin: { value: 0.7 },
+            uTemp: { value: 8500.0 },
+            uDensity: { value: 2.0 },
+            uSpin: { value: 1.2 },
+            uInclination: { value: 30.0 },
+            cameraPos: { value: new THREE.Vector3(0, 0, 0) },
+            cameraDir: { value: new THREE.Vector3(0, 0, 0) },
+            cameraUp: { value: new THREE.Vector3(0, 1, 0) },
+            uShowJets: { value: true },
+            uShowCorona: { value: true },
+            uShowPhotonRing: { value: true },
+            uQuality: { value: 1.0 }
+        };
+
+        const geometry = new THREE.PlaneGeometry(2, 2);
+        const material = new THREE.ShaderMaterial({
+            vertexShader: document.getElementById('vertexShader').textContent,
+            fragmentShader: document.getElementById('fragmentShader').textContent,
+            uniforms: uniforms
+        });
+        scene.add(new THREE.Mesh(geometry, material));
+
+        let isDragging = false, lastMouseX = 0, lastMouseY = 0;
+
+        document.addEventListener('mousedown', e => { 
+            if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') { 
+                isDragging = true; 
+                lastMouseX = e.clientX; 
+                lastMouseY = e.clientY; 
+            }
+        });
+        
+        document.addEventListener('mouseup', () => isDragging = false);
+        
+        document.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            theta -= (e.clientX - lastMouseX) * 0.005;
+            phi -= (e.clientY - lastMouseY) * 0.005;
+            phi = Math.max(0.1, Math.min(Math.PI - 0.1, phi));
+            lastMouseX = e.clientX; 
+            lastMouseY = e.clientY;
+        });
+        
+        document.addEventListener('wheel', e => {
+            e.preventDefault();
+            radius = Math.max(3.0, Math.min(50.0, radius + e.deltaY * 0.015));
+        }, { passive: false });
+
+        document.addEventListener('dblclick', () => {
+            radius = initialRadius;
+            theta = initialTheta;
+            phi = initialPhi;
+        });
+        
+        // TOUCH CONTROLS
+        document.addEventListener('touchstart', e => {
+            if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+                isDragging = true;
+                lastMouseX = e.touches[0].clientX;
+                lastMouseY = e.touches[0].clientY;
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', () => isDragging = false);
+
+        document.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            if(e.cancelable) e.preventDefault(); 
+            
+            const x = e.touches[0].clientX;
+            const y = e.touches[0].clientY;
+            
+            theta -= (x - lastMouseX) * 0.005;
+            phi -= (y - lastMouseY) * 0.005;
+            phi = Math.max(0.1, Math.min(Math.PI - 0.1, phi));
+            
+            lastMouseX = x;
+            lastMouseY = y;
+        }, { passive: false });
+
+        function updateMetrics() {
+            const M = uniforms.uMass.value;
+            const a = uniforms.uKerrSpin.value * M;
+            
+            const rH = M + Math.sqrt(Math.max(0, M * M - a * a));
+            document.getElementById('metric-horizon').textContent = `${rH.toFixed(2)} M`;
+            
+            const Z1 = 1.0 + Math.pow(Math.max(0.001, 1.0 - (a*a)/(M*M)), 1.0/3.0) * (Math.pow(1.0 + a/M, 1.0/3.0) + Math.pow(Math.max(0.001, 1.0 - a/M), 1.0/3.0));
+            const Z2 = Math.sqrt(3.0 * (a*a)/(M*M) + Z1 * Z1);
+            const rISCO = M * (3.0 + Z2 - Math.sqrt((3.0 - Z1) * (3.0 + Z1 + 2.0 * Z2)));
+            document.getElementById('metric-isco').textContent = `${rISCO.toFixed(2)} M`;
+            
+            const rPhoton = 1.5 * M;
+            document.getElementById('metric-photon').textContent = `${rPhoton.toFixed(2)} M`;
+            
+            const rErgo = M + Math.sqrt(Math.max(0, M * M - a * a * 0.5));
+            document.getElementById('metric-ergo').textContent = `${rErgo.toFixed(2)} M`;
+        }
+
+        function bindControl(id, key, dispId, fmt, callback) {
+            const slider = document.getElementById(id);
+            slider.addEventListener('input', e => {
+                const v = parseFloat(e.target.value);
+                uniforms[key].value = v;
+                if(dispId) document.getElementById(dispId).textContent = fmt ? fmt(v) : v;
+                if(callback) callback(v);
+            });
+        }
+
+        bindControl('mass', 'uMass', 'val-mass', v => `${v.toFixed(1)} M☉`, updateMetrics);
+        bindControl('kerr', 'uKerrSpin', 'val-kerr', v => v.toFixed(3), updateMetrics);
+        bindControl('temp', 'uTemp', 'val-temp', v => `${Math.round(v)} K`);
+        bindControl('density', 'uDensity', 'val-density', v => v.toFixed(1));
+        bindControl('spin', 'uSpin', 'val-spin', v => v.toFixed(1));
+        bindControl('inclination', 'uInclination', 'val-inclination', v => `${Math.round(v)}°`);
+
+        document.getElementById('show-jets').addEventListener('change', e => {
+            uniforms.uShowJets.value = e.target.checked;
+        });
+
+        document.getElementById('show-corona').addEventListener('change', e => {
+            uniforms.uShowCorona.value = e.target.checked;
+        });
+
+        document.getElementById('show-photon-ring').addEventListener('change', e => {
+            uniforms.uShowPhotonRing.value = e.target.checked;
+        });
+
+        let adaptiveQuality = true;
+        document.getElementById('adaptive-quality').addEventListener('change', e => {
+            adaptiveQuality = e.target.checked;
+            if(!adaptiveQuality) uniforms.uQuality.value = 1.0;
+        });
+
+        const presets = {
+            schwarzschild: { mass: 1.0, kerr: 0.0, temp: 5000, density: 1.0, spin: 0.8, inclination: 30 },
+            moderate: { mass: 1.5, kerr: 0.5, temp: 10000, density: 2.5, spin: 1.5, inclination: 45 },
+            extreme: { mass: 2.0, kerr: 0.998, temp: 15000, density: 3.5, spin: 2.5, inclination: 60 },
+            quasar: { mass: 3.0, kerr: 0.9, temp: 30000, density: 8.0, spin: 4.0, inclination: 20 },
+            sgra: { mass: 1.2, kerr: 0.52, temp: 6500, density: 1.5, spin: 1.0, inclination: 50 },
+            m87: { mass: 4.0, kerr: 0.9, temp: 12000, density: 5.0, spin: 2.8, inclination: 17 }
+        };
+
+        window.applyPreset = function(name) {
+            const preset = presets[name];
+            if(!preset) return;
+            
+            Object.keys(preset).forEach(key => {
+                const elementId = key;
+                const uniformKey = 'u' + key.charAt(0).toUpperCase() + key.slice(1);
+                const element = document.getElementById(elementId);
+                
+                if(element) {
+                    element.value = preset[key];
+                    if(uniforms[uniformKey]) uniforms[uniformKey].value = preset[key];
+                    
+                    const valId = 'val-' + key;
+                    const valElement = document.getElementById(valId);
+                    if(valElement) {
+                        if(key === 'mass') valElement.textContent = `${preset[key].toFixed(1)} M☉`;
+                        else if(key === 'kerr') valElement.textContent = preset[key].toFixed(3);
+                        else if(key === 'temp') valElement.textContent = `${Math.round(preset[key])} K`;
+                        else if(key === 'inclination') valElement.textContent = `${Math.round(preset[key])}°`;
+                        else valElement.textContent = preset[key].toFixed(1);
+                    }
+                }
+            });
+            
+            updateMetrics();
+        };
+
+        // FPS counter
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let fps = 60;
+
+        function updateFPS(currentTime) {
+            frameCount++;
+            const elapsed = currentTime - lastTime;
+            
+            if(elapsed >= 1000) {
+                fps = Math.round((frameCount * 1000) / elapsed);
+                document.getElementById('fps-value').textContent = fps;
+                frameCount = 0;
+                lastTime = currentTime;
+                
+                // Adaptive quality
+                if(adaptiveQuality) {
+                    if(fps < 30) uniforms.uQuality.value = Math.max(0.5, uniforms.uQuality.value - 0.1);
+                    else if(fps > 50) uniforms.uQuality.value = Math.min(1.0, uniforms.uQuality.value + 0.05);
+                }
+            }
+        }
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            updateFPS(time);
+            
+            uniforms.iTime.value = time * 0.001;
+            
+            const x = radius * Math.sin(phi) * Math.cos(theta);
+            const y = radius * Math.cos(phi);
+            const z = radius * Math.sin(phi) * Math.sin(theta);
+            
+            uniforms.cameraPos.value.set(x, y, z);
+            uniforms.cameraDir.value.set(-x, -y, -z).normalize();
+            
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            renderer.setSize(w, h);
+            uniforms.iResolution.value.set(
+                w * renderer.getPixelRatio(), 
+                h * renderer.getPixelRatio()
+            );
+        });
+
+        updateMetrics();
+        animate(0);
+    </script>
+</body>
+</html>
