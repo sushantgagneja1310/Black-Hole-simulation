@@ -64,7 +64,7 @@ $$Where:
 The engine explicitly calculates the **Innermost Stable Circular Orbit (ISCO)** to determine the inner edge of the accretion disk:
 
 $$r\_{ISCO} = M \left( 3 + Z\_2 \mp \sqrt{(3-Z\_1)(3+Z\_1+2Z\_2)} \right)
-$$\#\# 🎮 Controls
+$$\#\#
 
 | Control | Action |
 | :--- | :--- |
@@ -76,13 +76,5 @@ $$\#\# 🎮 Controls
 ## ⚡ Performance
 
 The engine includes an **Adaptive Quality** system. It monitors the client's frame rate (FPS) and dynamically adjusts the ray-marching step count and precision. This ensures smooth performance on high-end GPUs while maintaining playability on mobile devices.
-
-## 📦 Installation
-
-1.  Clone the repo:
-    ```bash
-    git clone [https://github.com/yourusername/black-hole-simulation.git](https://github.com/yourusername/black-hole-simulation.git)
-    ```
-2.  Open `BlackHole.HTML` in any modern browser. No build step required.
 
 -----
