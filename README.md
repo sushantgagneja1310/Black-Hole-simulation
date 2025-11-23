@@ -2,8 +2,6 @@
 
 A high-performance, real-time General Relativistic Ray-Tracer running entirely on the GPU via WebGL. This engine visualizes the spacetime curvature, gravitational lensing, and relativistic optical effects around a rotating (Kerr) black hole.
 
-🚀 Launch Live Simulation
-
 🔭 Scientific Visualization
 
 Unlike standard Schwarzschild simulations (static black holes), this engine implements the Kerr Metric, allowing for the simulation of frame-dragging (the Lense-Thirring effect). It renders a volumetric accretion disk with physically based lighting models including Doppler beaming and gravitational redshift.
@@ -54,8 +52,11 @@ The engine solves for the path of photons in the Kerr geometry. The simulation a
 
 The Kerr Metric (in Boyer-Lindquist coordinates):
 
-$$ds^2 = -\left(1 - \frac{2Mr}{\Sigma}\right) dt^2 - \frac{4Mar\sin^2\theta}{\Sigma} dt d\phi + \frac{\Sigma}{\Delta} dr^2 + \Sigma d\theta^2 + \left(r^2 + a^2 + \frac{2Ma^2r\sin^2\theta}{\Sigma}\right) \sin^2\theta d\phi^2
-$$Where:
+$$
+ds^2 = -\left(1 - \frac{2Mr}{\Sigma}\right) dt^2 - \frac{4Mar\sin^2\theta}{\Sigma} dt d\phi + \frac{\Sigma}{\Delta} dr^2 + \Sigma d\theta^2 + \left(r^2 + a^2 + \frac{2Ma^2r\sin^2\theta}{\Sigma}\right) \sin^2\theta d\phi^2
+$$
+
+Where:
 
 * $\Delta = r^2 - 2Mr + a^2$
 * $\Sigma = r^2 + a^2\cos^2\theta$
@@ -64,7 +65,7 @@ $$Where:
 The engine explicitly calculates the **Innermost Stable Circular Orbit (ISCO)** to determine the inner edge of the accretion disk:
 
 $$r\_{ISCO} = M \left( 3 + Z\_2 \mp \sqrt{(3-Z\_1)(3+Z\_1+2Z\_2)} \right)
-$$\#\#
+$$\#\# 
 
 | Control | Action |
 | :--- | :--- |
@@ -76,5 +77,4 @@ $$\#\#
 ## ⚡ Performance
 
 The engine includes an **Adaptive Quality** system. It monitors the client's frame rate (FPS) and dynamically adjusts the ray-marching step count and precision. This ensures smooth performance on high-end GPUs while maintaining playability on mobile devices.
-
 -----
